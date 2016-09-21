@@ -68,7 +68,12 @@ next_state(S,_V,{call, _, put_op, [Key, Clock, Entry]}) ->
 next_state(S,_V, {call, _, get_ops, [_Key, _From, _To]}) ->
   S.
 
-precondition(_S,_Cmd) -> true.
+
+precondition(S, {call, _, get_ops, [_Key, From, To]}) ->
+  FromVc = vectorclock:from_list(From),
+  ToVc = vectorclock:from_list(To),
+  vectorclock:le(FromVc, ToVc);
+precondition(_S,{call, _, put_op, [_Key, _Clock, _Entry]}) -> true.
 
 
 postcondition(_S, {call, _, put_op, [_Key, _Clock, _Entry]}, _Res) ->
@@ -86,7 +91,7 @@ randomKey() ->
   elements([keyA, keyB, keyC]).
 
 randomVectorclock() ->
-  L = orderedlist(tuple([randomDc(), choose(0, 1000)])),
+  L = [tuple([randomDc(), choose(0, 1000)]) |  list(tuple([randomDc(), choose(0, 1000)]))],
   L.
 
 randomDc() ->
