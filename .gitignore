@@ -18,4 +18,5 @@ tags
 rel/vars/*.config
 .rebar/*
 *.dump
-
+_build/
+test/.rebar3/

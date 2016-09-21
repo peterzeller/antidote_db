@@ -133,7 +133,7 @@ vectorclock_to_dict(VC) ->
 vectorclock_to_sorted_list(VC) ->
     case is_list(VC) of
         true -> lists:sort(VC);
-        false -> lists:sort(vectorclock:to_list(VC))
+        false -> lists:sort(dict:to_list(VC))
     end.
 
 %% Workaround for basho bench

@@ -1,0 +1,10 @@
+[{<<"antidote_utils">>,
+  {git,"git://github.com/SyncFree/antidote_utils",
+       {ref,"20e34c345ba6c0f4f4da31e478e3e609b4d859f4"}},
+  0},
+ {<<"eleveldb">>,
+  {git,"git://github.com/SyncFree/eleveldb",
+       {ref,"4669c3bf68f1e0ccfd0b4e42cf57d97327cb79ba"}},
+  0},
+ {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.8">>},1},
+ {<<"lager">>,{pkg,<<"lager">>,<<"3.2.1">>},0}].
