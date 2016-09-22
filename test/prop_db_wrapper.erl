@@ -82,7 +82,7 @@ postcondition(S, {call, _, get_ops, [Key, From, To]}, Res) ->
   FromVc = vectorclock:from_list(From),
   ToVc = vectorclock:from_list(To),
   ModelOps = [Op || {K,C,Op} <- S#state.operations, K == Key
-                  , vectorclock:ge(vectorclock:from_list(C), FromVc)
+                  , not vectorclock:le(vectorclock:from_list(C), FromVc)
                   , vectorclock:le(vectorclock:from_list(C), ToVc)],
   % io:format("Expected: ~p, Actual: ~p~n", [ModelOps, Res]),
   lists:sort(ModelOps) == lists:sort(Res).
@@ -91,8 +91,19 @@ randomKey() ->
   elements([keyA, keyB, keyC]).
 
 randomVectorclock() ->
-  L = [tuple([randomDc(), choose(0, 1000)]) |  list(tuple([randomDc(), choose(0, 1000)]))],
-  L.
+  ?LET(T, vector(3, randomDot()), case T of [X1,X2,X3] -> makeDot(dc1, X1) ++ makeDot(dc2, X2) ++ makeDot(dc3, X3) end).
+  %L = non_empty(list(tuple([randomDc(), choose(0, 20)]))), 
+  %L = [tuple([randomDc(), choose(0, 1000)]) |  list(tuple([randomDc(), choose(0, 1000)]))],
+  %L.
+
+makeDot(_Dc, 0) -> [];
+makeDot(Dc, Time) -> [{Dc, Time}]. 
+
+randomDot() ->
+  frequency([
+    {1, 0},
+    {9, choose(0, 20)}
+  ]).
 
 randomDc() ->
   elements([dc1, dc2, dc3]).

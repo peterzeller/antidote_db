@@ -11,9 +11,9 @@
 -include_lib("antidote_utils/include/antidote_utils.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -export([all/0]).
--export([test1/1, test2/1, test3/1, test4/1]).
+-export([test1/1, test2/1, test3/1, test4/1, test5/1]).
 
-all() -> [test1, test2, test3, test4].
+all() -> [test1, test2, test3, test4, test5].
 
 withFreshDb(F) ->
   {ok, Db} = antidote_db:new("test_db", leveldb),
@@ -56,7 +56,14 @@ test4(_Config) ->
   withFreshDb(fun(Db) -> 
     ok = antidote_db:put_op(Db, d, vectorclock:from_list([{dc1,1},{dc3,2}]), logEntry),
     Records = antidote_db:get_ops(Db, d, vectorclock:from_list([{dc1,2},{dc3,1}]), vectorclock:from_list([{dc1,3},{dc3,3}])),
-    ?assertEqual([], lists:sort(Records)),
+    ?assertEqual([logEntry], lists:sort(Records)),
     true
   end).
 
+test5(_Config) ->
+  withFreshDb(fun(Db) -> 
+    ok = antidote_db:put_op(Db, d, vectorclock:from_list([{dc1,7},{dc2,14},{dc3,14}]), logEntry),
+    Records = antidote_db:get_ops(Db, d, vectorclock:from_list([{dc2,5},{dc3,7}]), vectorclock:from_list([{dc1,10},{dc2,11},{dc3,17}])),
+    ?assertEqual([], lists:sort(Records)),
+    true
+  end).
