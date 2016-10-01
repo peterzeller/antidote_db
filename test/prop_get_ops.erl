@@ -9,11 +9,16 @@
 
 
 
--export([prop_get_ops/0]).
+-export([prop_get_ops/0, blub/0]).
+
+
+blub() ->
+  Ops = [{inc,dc2,1},{inc,dc3,1},{inc,dc2,1},{pull,dc2,dc3},{inc,dc3,1}],
+  checkSpec(opsToClocks(Ops)).
 
 prop_get_ops() ->
-	?FORALL(Clocks, generateClocks(),
-      checkSpec(Clocks)
+	?FORALL(Ops, generateOps(),
+      checkSpec(opsToClocks(Ops))
     ).
 
 checkSpec(Clocks) ->
@@ -44,10 +49,6 @@ checkGetOps(Db, Entries, From, To) ->
   case lists:sort(Records) == lists:sort(Expected) of
     true -> true;
     false ->
-%%      io:format("Entries = ~p~n", [[{dict:to_list(C), E} || {C,E} <- Entries]]),
-%%      io:format("From = ~p, To = ~p~n", [dict:to_list(From), dict:to_list(To)]),
-%%      io:format("Expected = ~p~n", [Expected]),
-%%      io:format("Records = ~p~n", [Records]),
       io:format("~n---- Start of testcase -------~n"),
       [io:format("ok = antidote_db:put_op(Db, key, vectorclock:from_list(~w), ~w),~n",
         [dict:to_list(C), E]) || {C,E} <- Entries],
@@ -59,11 +60,6 @@ checkGetOps(Db, Entries, From, To) ->
       false
   end .
 
-%%  ok = antidote_db:put_op(Db, d, vectorclock:from_list([{dc1,1},{dc2,3},{dc3,3}]), logEntry1),
-%%  ok = antidote_db:put_op(Db, d, vectorclock:from_list([{dc1,2},{dc2,0},{dc3,1}]), logEntry2),
-%%  ok = antidote_db:put_op(Db, d, vectorclock:from_list([{dc1,2},{dc2,1},{dc3,1}]), logEntry3),
-%%   Records = antidote_db:get_ops(Db, d, vectorclock:from_list([{dc1,3},{dc2,2},{dc3,2}]), vectorclock:from_list([{dc1,10},{dc2,10},{dc3,10}])),
-%%?assertEqual([logEntry1], lists:sort(Records)),
 
 
 generateClocks() ->
@@ -76,12 +72,13 @@ opsToClocks(Ops) ->
 execOps([], State) -> State;
 execOps([{pull, SourceR, TargetR}|RemainingOps], {OpClocks, State}) ->
   SourceClocks = orddict:fetch(SourceR, State),
-  TargetClock = lists:last(orddict:fetch(SourceR, State)),
+  TargetClock = lists:last(orddict:fetch(TargetR, State)),
   NewSourceClocks = [C || C <- SourceClocks, not vectorclock:le(C, TargetClock)],
   MergedClock =
     case NewSourceClocks of
       [] -> TargetClock;
-      [C|_] -> vectorclock:max([C, TargetClock])
+      [C|_] ->
+        vectorclock:max([C, TargetClock])
     end,
   NewState = orddict:append(TargetR, MergedClock, State),
   execOps(RemainingOps, {OpClocks, NewState});

@@ -90,11 +90,11 @@ test7(_Config) ->
 test8(_Config) ->
   withFreshDb(
     fun(Db) ->
-      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc2,1}]), {logEntry,4}),
-      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc1,2},{dc2,1}]), {logEntry,3}),
-      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc1,2}]), {logEntry,2}),
-      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc1,1}]), {logEntry,1}),
-      Records = antidote_db:get_ops(Db, key, vectorclock:from_list([{dc1,2}]), vectorclock:from_list([{dc1,2},{dc2,1}])),
+      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc3,1}]), {logEntry,4}),
+      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc2,3},{dc3,1}]), {logEntry,3}),
+      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc2,2}]), {logEntry,2}),
+      ok = antidote_db:put_op(Db, key, vectorclock:from_list([{dc2,1}]), {logEntry,1}),
+      Records = antidote_db:get_ops(Db, key, vectorclock:from_list([{dc2,2}]), vectorclock:from_list([{dc2,3},{dc3,1}])),
       ?assertEqual([{logEntry,3},{logEntry,4}], lists:sort(Records)),
       true
     end).

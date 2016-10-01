@@ -134,7 +134,7 @@ get_ops(DB, Key, VCFrom, VCTo) ->
                         case vectorclock:le(VC1Dict, VCToDict) of
                             true ->
                                 %% check its an op and its commit time is in the required range
-                                case vectorclock:lt(VC1Dict, VCFromDict) of
+                                case vectorclock:le(VC1Dict, VCFromDict) of
                                     true ->
                                         %% Check if last two VCs are concurrent or we should break the fold
                                         %% If it's concurrent, save the last vc for the next iteration
