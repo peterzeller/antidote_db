@@ -69,7 +69,7 @@ next_state(S,_V, {call, _, get_ops, [_Key, _From, _To]}) ->
   S.
 
 
-precondition(S, {call, _, get_ops, [_Key, From, To]}) ->
+precondition(_S, {call, _, get_ops, [_Key, From, To]}) ->
   FromVc = vectorclock:from_list(From),
   ToVc = vectorclock:from_list(To),
   vectorclock:le(FromVc, ToVc);
@@ -105,8 +105,8 @@ randomDot() ->
     {9, choose(0, 20)}
   ]).
 
-randomDc() ->
-  elements([dc1, dc2, dc3]).
+%%randomDc() ->
+%%  elements([dc1, dc2, dc3]).
 
 randomLogEntry() ->
   elements([x, y, z]).
