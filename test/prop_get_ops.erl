@@ -35,7 +35,7 @@ checkSpec(Clocks) ->
         end, {1, []}, VClocks),
       % generate all possible {From, To} pairs from the clocks
       ClockPairs = [{From,To} || From <- VClocks, To <- VClocks, vectorclock:le(From, To)],
-      lists:all(fun({From, To}) -> checkGetOps(Db, Entries, From, To) end, ClockPairs)
+      conjunction([{{dict:to_list(From), dict:to_list(To)}, checkGetOps(Db, Entries, From, To)}  || {From, To} <- ClockPairs])
     end).
 
 checkGetOps(Db, Entries, From, To) ->
@@ -45,10 +45,8 @@ checkGetOps(Db, Entries, From, To) ->
     not vectorclock:le(Clock, From),
     vectorclock:le(Clock, To)
     ],
-
-  case lists:sort(Records) == lists:sort(Expected) of
-    true -> true;
-    false ->
+  ?WHENFAIL(
+    begin
       io:format("~n---- Start of testcase -------~n"),
       [io:format("ok = antidote_db:put_op(Db, key, vectorclock:from_list(~w), ~w),~n",
         [dict:to_list(C), E]) || {C,E} <- Entries],
@@ -56,9 +54,9 @@ checkGetOps(Db, Entries, From, To) ->
         [dict:to_list(From), dict:to_list(To)]),
       io:format("?assertEqual(~w, lists:sort(Records)),~n", [lists:sort(Expected)]),
       io:format("% returned ~w~n", [Records]),
-      io:format("---- End of testcase -------~n"),
-      false
-  end .
+      io:format("---- End of testcase -------~n")
+    end,
+    lists:sort(Records) == lists:sort(Expected)).
 
 
 
